@@ -152,14 +152,14 @@ module.exports = function(app, express) {
             //-----> JSON CONVERSION CODE
             if(req.body.format == "JSON"){
                 //Check if file exists, alert the user if it does or does not
-                fs.stat(file_name + '.json', function(err, stat) {
-                    if(err == null) {
-                        res.send("File already exists. Overwriting it.");
-                    }
-                    else{
-                        res.send("Creating file");
-                    }
-                });
+                // fs.stat(file_name + '.json', function(err, stat) {
+                //     // if(err == null) {
+                //     //     res.send("File already exists. Overwriting it.");
+                //     // }
+                //     // else{
+                //     //     res.send("Creating file");
+                //     // }
+                // });
                 fs.writeFile(file_name + '.json', JSON.stringify(tweets_array), function(err) {
                     if(err){
                         console.log(err);
@@ -171,6 +171,7 @@ module.exports = function(app, express) {
                     //Clear the tweets array so that the user can get a new stream of tweets and export
                     //that stream if they so choose to
                     tweets_array = [];
+                    return;
                 });
             }
             //-----> XML CONVERSION CODE <STILL NOT WORKING PROPERLY>
