@@ -2,6 +2,8 @@ var Twitter = require('twitter');
 var Tweet = require('../app/models/tweets');
 var fs = require('fs');
 var js2xmlparser = require("js2xmlparser");
+// var path = require('path');
+// var mime = require('mime');
 
 module.exports = function(app, express) {
 
@@ -161,6 +163,10 @@ module.exports = function(app, express) {
                 fs.writeFile(file_name + '.json', JSON.stringify(tweets_array), function(err) {
                     if(err){
                         console.log(err);
+                    }
+                    else{
+                        var file = file_name + '.json';
+                        res.download(file);
                     }
                     //Clear the tweets array so that the user can get a new stream of tweets and export
                     //that stream if they so choose to
