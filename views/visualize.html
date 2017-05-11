@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html ng-app="lab10_twitter_visuals">
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <title>Lab 10</title>
+    <style>
+    	body {
+    		margin-top: 30px;
+    		background: url(empac.jpg);
+    	}
+    	h1, h5{
+    		text-align: center;
+    	}
+    	/*Additional spacing for buttons*/
+    	.suBmit {
+    		margin-top: 10px;
+    	}
+    	.form-group{
+    		margin-right: 10px;
+    		margin-top: 5px;
+    	}
+
+    	.well {
+    		background: #F0F8FF;
+    	}
+    	/*Appears while the analytics */
+    	.loader {
+		    border: 16px solid #f3f3f3; /* Light grey */
+		    border-top: 16px solid #3498db; /* Blue */
+		    border-radius: 50%;
+		    width: 120px;
+		    height: 120px;
+		    animation: spin 2s linear infinite;
+		    margin: auto;
+		}
+
+		h5{
+			line-height: 200%;
+		}
+
+		@keyframes spin {
+		    0% { transform: rotate(0deg); }
+		    100% { transform: rotate(360deg); }
+		}
+    </style>
+</head>
+
+<body>
+	<div ng-controller="mainController">
+	    <div class="container">
+	    	<div class="row">
+	    		<div class="col-md-12">
+	    			<div class="well">
+	    				<h1>Twitter Scraper</h1>
+	    			</div>
+	    		</div>
+	    	</div>
+	    	<div class="row">
+	    		<div class="col-md-12">
+	    			<div class="well">
+	    				<h5>Visualize Tweets By <mark>Location</mark> or <mark>Friends Count Level </mark> or <mark>Followers Count Level</mark></h5>
+	    				<div class="text-center">
+	    					<!--Return to landing page-->
+	    					<input type="submit" class="suBmit btn btn-primary" value="Return To Query Page" ng-click="home()">
+	    				</div>
+	    				<!--Choose type of graph you want to see displayed: three types-->
+	    				<div class="form-group">
+	    					Visualization Types: <select class='form-control suBmit' ng-model="selectedName" ng-init="selectedName = names[0]" ng-options="item for item in names"></select>
+	    				</div>
+	    				<!--Tabbed interface to select how you want to visualize your tweets-->
+	    				<!--You can visualize tweets by location, user following level, or user followers-->
+	    				<!--User Follower and User Friend levels are aggregations meant to enhance visual analysis of tweet data-->
+	    				<div class="text-center">
+	        				<input type="submit" class="suBmit btn btn-primary" value="Visualize Tweets By Location" ng-click="visual('location')">
+	        				<input type="submit" class="suBmit btn btn-primary" value="Visualize Tweets By User Friends Count Level" ng-click="visual('friends_count_level')">
+	        				<input type="submit" class="suBmit btn btn-primary" value="Visualize Tweets By Followers Count Level" ng-click="visual('followers_count_level')">
+	        			</div>
+	    			</div>
+	    		</div>
+	    	</div>
+	    	<div class="row">
+	    		<!--Hide while graphs are loading-->
+	    		<div id="graphs_well" class="col-md-12">
+		    		<div class="col col-md-3">
+		    		</div>
+		    		<div class="col col-md-6">
+		    			<h5 id="title" class="well"></h5>
+		    			<h5 id="description" class="well"></h5>
+		    			<!--Graphs will appear here-->
+		    			<div class="well" id="graphs" style="margin-top: 10px;width: 100%; height: 500px;color:black"></div>
+		    		</div>
+		    		<div class="col col-md-3">
+		    		</div>
+			    </div>
+			    <!--Show loading spinner while graphs are loading-->
+			    <div id="loading_well" class="col-md-12">
+			    	<div class="col col-md-3">
+		    		</div>
+		    		<!--Show when loading-->
+		    		<div class="col col-md-6">
+		    			<div class='loader'>
+		    		</div>
+		    		<div class="col col-md-3">
+		    		</div>
+			    </div>
+	    	</div>
+	   	</div>
+	</div>
+</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js"></script>
+<!-- To use google visualizatoin api -->
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script> 
+<script>
+	//Variables/info we need to populate data visualizatons
+	//dic is JS Object that contains key, value pairs
+	//Key is a particular location or category depending on operation user selected
+	//Value is the frequency of tweets that fall into that category or location
+	//Keys is an array of keys used to index the dic object (essentially it is like a Python dictionary)
+	function drawTable(dic,keys,item) {
+	    var title = "";
+	    var description = "";
+	    var first_column = "";
+		if(keys.length == 0){
+          alert("There was a problem");
+          return;
+        }
+        //For each operation display the appropriate title and description 
+		if(item == "location"){
+			title = "Tweets By Location";
+			description = "The location in the Location column represents a user's location. The number in the Frequency column represents the frequency of users who fall into a particular location, based on the tweets queried.";
+			first_column = 'Location';
+		}
+		else if(item == "friends_count_level"){
+			title = "Tweets By Friends Count Level";
+			description = "The level in the Level column represents a user's 'level of friends.' Users fall into one of four categories, having 0-99, 100-999, 1000-9999, or 10,000+ friends. The number in the Frequency column represents the frequency of users who fall into a particular category, based on the tweets queried.";
+			first_column = 'Level';
+		}
+		else if(item == "followers_count_level"){
+			title = "Tweets By Followers Count Level";
+			description = "The range in the levels column represents a user's 'level of followers.' Users fall into one of four categories, having 0-99, 100-999, 1000-9999, or 10,000+ followers. The number in the Frequency column represents the frequency of users who fall into a particular category, based on the tweets queried.";
+			first_column = 'Level';
+		}
+		//Create an array
+		var arr = [];
+		//Populate it with data from mongo db
+	    for(i=0; i< keys.length; i++){
+	      arr.push([String(keys[i]),parseInt(dic[keys[i]])]);
+	      console.log([String(keys[i]),parseInt(dic[keys[i]])]);
+	      if(i == keys.length-1){
+	      	//Timeout to ensure array is built before graph is processed
+	        setTimeout(function(){
+	          console.log(arr);
+	          //Initialize graph
+	          var data = new google.visualization.DataTable();
+	          data.addColumn('string', first_column);
+	          data.addColumn('number', 'Frequency');
+	          data.addRows(arr);
+	          $('#title').html(title);
+	          $('#description').html(description);
+	          $('#loading_well').hide();
+	          $('#graphs_well').show();
+	          var table = new google.visualization.Table(document.getElementById('graphs'));
+	          table.draw(data, {showRowNumber: true, width: '100%', height: '200px'});
+	        }, 3000);
+	      }
+	    }      
+	  }
+
+	 //Variables/info we need to populate data visualizatons
+	//dic is JS Object that contains key, value pairs
+	//Key is a particular location or category depending on operation user selected
+	//Value is the frequency of tweets that fall into that category or location
+	//Keys is an array of keys used to index the dic object (essentially it is like a Python dictionary)
+	function drawChart(dic,keys,item) {
+		var title = "";
+		var description = "";
+		var first_column = "";
+		if(keys.length == 0){
+          alert("There was a problem");
+          return;
+        }
+        //For each operation display the appropriate title and description 
+		if(item == "location"){
+			title = "Tweets By Location";
+			description = "The location above the blue dot represents a user's location. The number below the blue dot represents the frequency of users who fall into a particular location, based on the tweets queried.";
+			first_column = 'Location';
+		}
+		else if(item == "friends_count_level"){
+			title = "Tweets By Friends Count Level";
+			description = "The range above the blue dot represents a user's 'level of friends.' Users fall into one of four categories, having 0-99, 100-999, 1000-9999, or 10,000+ friends. The number below the blue dot represents the frequency of users who fall into a particular category, based on the tweets queried.";
+			first_column = 'Level';
+		}
+		else if(item == "followers_count_level"){
+			title = "Tweets By Followers Count Level";
+			description = "The range above the blue dot represents a user's 'level of followers.' Users fall into one of four categories, having 0-99, 100-999, 1000-9999, or 10,000+ followers. The number below the blue dot represents the frequency of users who fall into a particular category, based on the tweets queried.";
+			first_column = 'Level';
+		}
+        var arr = [[first_column,'Frequency']];
+        for(i=0; i< keys.length; i++){
+          arr.push([String(keys[i]),parseInt(dic[keys[i]])]);
+          if(i == keys.length-1){
+          	//Timeout to ensure array is built before graph is processed
+            setTimeout(function(){ 
+              console.log(arr);
+              var data = google.visualization.arrayToDataTable(arr);
+              var options = {
+                width: 400, height: 300,
+                redFrom: 90, redTo: 100,
+                yellowFrom:75, yellowTo: 90,
+                minorTicks: 5
+              };
+              $('#title').html(title);
+              $('#description').html(description);
+              $('#loading_well').hide();
+	          $('#graphs_well').show();
+	          //Initialize graph
+              var chart = new google.visualization.Gauge(document.getElementById('graphs'));
+              chart.draw(data, options);
+            }, 3000);
+          }
+        }      
+      }
+
+     //Variables/info we need to populate data visualizatons
+	//dic is JS Object that contains key, value pairs
+	//Key is a particular location or category depending on operation user selected
+	//Value is the frequency of tweets that fall into that category or location
+	//Keys is an array of keys used to index the dic object (essentially it is like a Python dictionary)
+    function drawPie(dic, keys,item) {
+	  	var title = "";
+	  	var description = "";
+	  	var first_column = "";
+		if(keys.length == 0){
+	      alert("There was a problem");
+	      return;
+	    }
+		if(item == "location"){
+			title = "Tweets By Location";
+			description = "The location represents a user's location. Each piece of the pie represents the frequency of users who fall into a particular location, based on the tweets queried.";
+			first_column = 'Location';
+		}
+		else if(item == "friends_count_level"){
+			title = "Tweets By Friends Count Level";
+			description = "The range represents a user's 'level of friends.' Users fall into one of four categories, having 0-99, 100-999, 1000-9999, or 10,000+ friends. Each piece of the pie represents the frequency of users who fall into a particular category, based on the tweets queried.";
+			first_column = 'Level';
+		}
+		else if(item == "followers_count_level"){
+			title = "Tweets By Followers Count Level";
+			description = "The range represents a user's 'level of followers.' Users fall into one of four categories, having 0-99, 100-999, 1000-9999, or 10,000+ followers. Each piece of the pie represents the frequency of users who fall into a particular category, based on the tweets queried.";
+			first_column = 'Level';
+		}
+		var arr = [[first_column,'Frequency']];
+      for(i=0; i< keys.length; i++){
+        arr.push([String(keys[i]),parseInt(dic[keys[i]])]);
+        if(i == keys.length-1){
+        //Timeout to ensure array is built before graph is processed
+          setTimeout(function(){ 
+            console.log(arr);
+            var data = google.visualization.arrayToDataTable(arr);
+            var options = {
+              pieHole: 0.4
+            };
+            $('#title').html(title);
+            $('#description').html(description);
+            $('#loading_well').hide();
+	        $('#graphs_well').show();
+            var chart = new google.visualization.PieChart(document.getElementById('graphs'));
+            chart.draw(data, options);
+          }, 3000);
+        }
+      }  
+    }
+
+
+
+	var app = angular.module("lab10_twitter_visuals", []);
+	app.controller("mainController", ['$scope','$http','$window', function($scope, $http, $window ) {
+		
+		//div that contains spinner loader that is displayed while graphs are being processed
+		$('#loading_well').hide();
+		//div that contains the graphs 
+		$('#graphs_well').hide();
+
+		//visual_dict is JS custom dictionary structure of key, value pairs
+		//keys represent a location or category (depending on user requested operation), values represent frequency
+		//of tweets that fall into the location or category
+		//visual_keys is an array of keys used to index the dicionary
+		$scope.visual_dict = "";
+		$scope.visual_keys = "";
+
+		//Graph options (used for selector)
+		$scope.names = ["table", "gauge", "donut"];
+
+		$scope.home = function () {
+	      //Redirect to visualize page
+	      $window.location.href = '/';
+	    };
+
+	    //Make post request to server to tell the server how the user wants to visualize their tweet data
+	    //Three operations: visualize tweets by location, followers level, or friends level (latter two are both aggregate functions created in server)
+		$scope.visual = function(item){
+		  $('#loading_well').show(); //show loader
+		  $('#graphs_well').hide();
+	      var req = {
+	        method: 'POST',
+	        url: '/visualize_function',
+	        data: {'q':item, 'graph_type': $scope.selectedName}
+	      }
+	      $http(req).success(function(data){
+	      	if(data == "Sorry, could not get any tweets from the DB. Please try again later." || data == "Sorry an error occured!"){
+	      		alert(data);
+	      		return;
+	      	}
+	        console.log(data);
+	        //Save the dictionary and array of keys
+	        $scope.visual_dict = data[0];
+	        $scope.visual_keys = data[1];
+	        for(i=0; i<$scope.visual_keys.length; i++){
+	          console.log($scope.visual_dict[$scope.visual_keys[i]]);
+	        }
+	        //Call the show function that will actually call the Google API graph processing functions
+	        $scope.show(item);
+	      });
+	    };
+
+	    $scope.show = function(item){
+	    	//Item is a particular operation i.e. (visualize tweets by location, followers level, or friends level)
+		    if($scope.selectedName == 'table'){
+	            google.charts.load('current', {'packages':['table']});
+            	google.charts.setOnLoadCallback(drawTable($scope.visual_dict,$scope.visual_keys,item));
+	        }
+	        else if($scope.selectedName == 'gauge'){
+	            google.charts.load('current', {'packages':['gauge']});
+	            google.charts.setOnLoadCallback(drawChart($scope.visual_dict,$scope.visual_keys,item));
+	        }
+	        else if($scope.selectedName == 'donut'){
+	            google.charts.load("current", {packages:['corechart']});
+	            google.charts.setOnLoadCallback(drawPie($scope.visual_dict,$scope.visual_keys,item));
+	        }
+       		console.log("show");  
+        };
+	}]);
+
+</script>
+</html>

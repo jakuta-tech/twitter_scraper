@@ -1,0 +1,28 @@
+{
+  "name": "Lab-10",
+  "version": "1.0.0",
+  "description": "Lab 10 - John Fantell",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "John Fantell",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jfantell/fantej_websci.git"
+  },
+  "license": "GPL-3.0",
+  "dependencies": {
+    "body-parser": "^1.16.1",
+    "express": "*",
+    "twitter": "*",
+    "fs":"*",
+    "http":"*",
+    "mongoose":"*",
+    "js2xmlparser":"*",
+    "morgan":"*",
+    "consolidate":"*",
+    "mustache":"*"
+  }
+}

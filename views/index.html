@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html ng-app="lab9_twitter">
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <title>Lab 10</title>
+    <style>
+    	body {
+    		margin-top: 30px;
+    		background: url(empac.jpg);
+    	}
+    	h1, h5{
+    		text-align: center;
+    	}
+    	.suBmit {
+    		margin-top: 10px;
+    	}
+    	.form-group{
+    		margin-right: 10px;
+    		margin-top: 5px;
+    	}
+
+    	.well {
+    		background: #F0F8FF;
+    	}
+
+    	.loader {
+		    border: 16px solid #f3f3f3; /* Light grey */
+		    border-top: 16px solid #3498db; /* Blue */
+		    border-radius: 50%;
+		    width: 120px;
+		    height: 120px;
+		    animation: spin 2s linear infinite;
+		    margin: auto;
+		}
+
+		@keyframes spin {
+		    0% { transform: rotate(0deg); }
+		    100% { transform: rotate(360deg); }
+		}
+    </style>
+</head>
+
+<body>
+	<div ng-controller="mainController">
+	    <div class="container">
+	    	<div class="row">
+	    		<div class="col-md-12">
+	    			<div class="well">
+	    				<h1>Twitter Scraper</h1>
+	    			</div>
+	    		</div>
+	    	</div>
+	    	<div class="row">
+	    		<div class="col-md-12">
+	    			<div class="well">
+	    				<h5>Filter tweets by <mark>Topic</mark> or <mark>Location</mark> or <mark>Username</mark></h5>
+	    				<div class="text-center">
+		    				<button type="button" class="btn btn-primary" ng-click="view=1">Location</button>
+	        				<button type="button" class="btn btn-primary" ng-click="view=2">Topic</button>
+	        				<button type="button" class="btn btn-primary" ng-click="view=3">Username</button>
+	        			</div>
+	    			</div>
+	    		</div>
+	    	</div>
+	    	<div class="row">
+	    		<div class="col-md-12">
+	    			<div class="well">
+		    			<form id="tweetForm">
+
+		    				<div ng-show="view==1">
+								<label>Step 1: Filter Tweets By Location (Select Latitude, Longitude &amp; Count)</label>
+			    				<div class="form-group">
+			    					<div class="row">
+			    						<div class="col col-md-4">
+			    							Count: <input class="form-control" class="tweetCount" placeholder="5" ng-model="tweetCount">
+			    						</div>
+			    						<div class="col col-md-4">
+			    							Latitude: <input class="form-control" id="latitude" placeholder="42.7302" ng-model="latitude">
+			    						</div>
+			    						<div class="col col-md-4">
+			    							Longitude: <input class="form-control" id="longitude" placeholder="73.6788" ng-model="longitude">
+			    						</div>
+			    					</div>
+			    				</div>
+			    				<label>Step 2: Process and Display Tweets</label>
+			    				<div class="form-group">		
+		    						<input type="submit" class="build_tweet_db_location suBmit btn btn-success btn-block" value="Get Tweets" ng-click="build_tweet_db_location()">
+			    				</div>
+			    				<div class="form-group">
+			    					<div class="row">
+			    						<div class="col col-md-6">
+			    							<button class="export_btn btn btn-primary btn-block" ng-click="toggle_export()">Export Tweets</button>
+			    						</div>
+			    						<div class="col col-md-6">
+			    							<button class="visualize_btn btn btn-primary btn-block" ng-click="toggle_visual()">Visualize Tweets</button>
+			    						</div>
+			    					</div>
+			    				</div>
+			    				<!--Other options-->
+			    				<div class="state_export">
+				    				<label>Step 3: Choose the file type of your choice, select a title, and Export Tweets</label>
+				    				<div class="form-group">
+				    					<div class="row">
+				    						<div class="col col-md-6">
+				    							File Format: <select class='form-control suBmit' ng-model="selectedName" ng-init="selectedName = names[0]" ng-options="item for item in names"></select>
+				    						</div>
+				    						<div class="col col-md-6">
+				    							File Name: <input class="form-control suBmit" type="text" id="location" placeholder="Troy_NY" ng-model="file_name">
+				    						</div>
+				    					</div>
+				    				</div>
+				    				<div class="form-group">
+			    						<input type="submit" class="export_tweets suBmit btn btn-default btn-block" value="Export" ng-click="export()">
+				    				</div>
+				    			</div>
+				    			<div class="state_visual">
+				    				<p><b>Clicking the button below will take you to another page!</b></p>
+				    				<input type="submit" class="suBmit btn btn-primary btn-block" value="Visualize Tweet Data" ng-click="visual_page()">
+				    			</div>
+			    			</div>
+
+			    			<div ng-show="view==2">
+								<label>Step 1: Filter Tweets By Topic (Select Topic &amp; Count)</label>
+			    				<div class="form-group">
+			    					<div class="row">
+			    						<div class="col col-md-6">
+			    							Count: <input class="form-control" class="tweetCount" placeholder="5" ng-model="tweetCount">
+			    						</div>
+			    						<div class="col col-md-6">
+			    							Topic: <input class="form-control" id="topic" placeholder="Information Technology" ng-model="topic">
+			    						</div>
+			    					</div>
+			    				</div>
+			    				<label>Step 2: Process and Display Tweets</label>
+			    				<div class="form-group">		
+		    						<input type="submit" class="build_tweet_db_topic suBmit btn btn-success btn-block" value="Get Tweets" ng-click="build_tweet_db_topic()">
+			    				</div>
+			    				<div class="form-group">
+			    					<div class="row">
+			    						<div class="col col-md-6">
+			    							<button class="export_btn btn btn-primary btn-block" ng-click="toggle_export()">Export Tweets</button>
+			    						</div>
+			    						<div class="col col-md-6">
+			    							<button class="visualize_btn btn btn-primary btn-block" ng-click="toggle_visual()">Visualize Tweets</button>
+			    						</div>
+			    					</div>
+			    				</div>
+			    				<!--Other options-->
+			    				<div class="state_export">
+				    				<label>Step 3: Choose the file type of your choice, select a title, and Export Tweets</label>
+				    				<div class="form-group">
+				    					<div class="row">
+				    						<div class="col col-md-6">
+				    							File Format: <select class='form-control suBmit' ng-model="selectedName" ng-init="selectedName = names[0]" ng-options="item for item in names"></select>
+				    						</div>
+				    						<div class="col col-md-6">
+				    							File Name: <input class="form-control suBmit" type="text" id="topic" placeholder="IT" ng-model="file_name">
+				    						</div>
+				    					</div>
+				    				</div>
+				    				<div class="form-group">
+			    						<input type="submit" class="export_tweets suBmit btn btn-default btn-block" value="Export" ng-click="export()">
+				    				</div>
+				    			</div>
+				    			<div class="state_visual">
+				    				<p><b>Clicking the button below will take you to another page!</b></p>
+				    				<input type="submit" class="suBmit btn btn-primary btn-block" value="Visualize Tweet Data" ng-click="visual_page()">
+				    			</div>
+			    	
+			    			</div>
+
+			    			<div ng-show="view==3">
+			    				<label>Step 1: Filter Tweets By Username (Select Username &amp; Count)</label>
+			    				<div class="form-group">
+			    					<div class="row">
+			    						<div class="col col-md-6">
+			    							Count: <input class="form-control" class="tweetCount" placeholder="5" ng-model="tweetCount">
+			    						</div>
+			    						<div class="col col-md-6">
+			    							Username: <input class="form-control" id="username" placeholder="@realDonaldTrump" ng-model="username">
+			    						</div>
+			    					</div>
+			    				</div>
+			    				<label>Step 2: Process and Display Tweets</label>
+			    				<div class="form-group">		
+		    						<input type="submit" class="build_tweet_db_username suBmit btn btn-success btn-block" value="Get Tweets" ng-click="build_tweet_db_username()">
+			    				</div>
+			    				<div class="form-group">
+			    					<div class="row">
+			    						<div class="col col-md-6">
+			    							<button class="export_btn btn btn-primary btn-block" ng-click="toggle_export()">Export Tweets</button>
+			    						</div>
+			    						<div class="col col-md-6">
+			    							<button class="visualize_btn btn btn-primary btn-block" ng-click="toggle_visual()">Visualize Tweets</button>
+			    						</div>
+			    					</div>
+			    				</div>
+			    				<!--Other options-->
+			    				<div class="state_export">
+				    				<label>Step 3: Choose the file type of your choice, select a title, and Export Tweets</label>
+				    				<div class="form-group">
+				    					<div class="row">
+				    						<div class="col col-md-6">
+				    							File Format: <select class='form-control suBmit' ng-model="selectedName" ng-init="selectedName = names[0]" ng-options="item for item in names"></select>
+				    						</div>
+				    						<div class="col col-md-6">
+				    							File Name: <input class="form-control suBmit" type="text" id="username" placeholder="realDonaldTrump" ng-model="file_name">
+				    						</div>
+				    					</div>
+				    				</div>
+				    				<div class="form-group">
+			    						<input type="submit" class="export_tweets suBmit btn btn-default btn-block" value="Export" ng-click="export()">
+				    				</div>
+				    			</div>
+				    			<div class="state_visual">
+				    				<p><b>Clicking the button below will take you to another page!</b></p>
+				    				<input type="submit" class="suBmit btn btn-primary btn-block" value="Visualize Tweet Data" ng-click="visual_page()">
+				    			</div>
+			    			</div>
+		    			</form>
+		    			<br>
+		    		</div>
+	    			<div class="stream" id="stream"></div>
+	    		</div>
+	    	</div>
+	   	</div>
+	</div>
+</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js"></script>
+<script>
+	var app = angular.module("lab9_twitter", []);
+	app.controller("mainController", ['$scope','$http','$window', function($scope, $http, $window) {
+		
+		//Default view
+		$scope.view = 1;
+
+		//Disable certain buttons while getting tweets from db
+		$('.export_tweets').prop('disabled', true);
+		$('.get_tweets').prop('disabled', true);
+		$('.visualize_btn').prop('disabled', true);
+		$('.export_btn').prop('disabled', true);
+
+		//Show visualize tweets menu
+		$('.state_visual').hide();
+
+		//Show export tweets menu
+		$('.state_export').hide();
+
+		$scope.latitude = "";
+    	$scope.longitude = "";
+    	$scope.tweetCount = "";
+    	$scope.topic = "";
+    	$scope.file_name = "";
+    	$scope.username = "";
+
+    	//Show the visualalize features
+    	$scope.show_visual_functions = false;
+    	$scope.show_export_functions = false;
+
+    	//Toggle visualize functionality
+    	$scope.toggle_visual = function () {
+    		$('.state_export').hide(); //div
+  			$scope.show_export_functions = false;
+
+    		if(!$scope.show_visual_functions){
+    			$('.state_visual').show();
+    			$scope.show_visual_functions = true;
+    		}
+    		else if($scope.show_visual_functions){
+    			$('.state_visual').hide();
+    			$scope.show_visual_functions = false;
+    		}
+	    };
+
+    	//Toggle export functionality
+    	 $scope.toggle_export = function () {
+	        $('.state_visual').hide(); //div
+	        $scope.show_visual_functions = false;
+	        
+    		if(!$scope.show_export_functions){
+    			$('.state_export').show();
+    			$scope.show_export_functions = true;
+    		}
+    		else if($scope.show_export_functions){
+    			$('.state_export').hide();
+    			$scope.show_export_functions = false;
+    		}
+	    };
+
+	    $scope.visual_page = function () {
+	      //Redirect to visualize page
+	      $window.location.href = '/visualize';
+	    };
+
+    	//Prepare to build database
+    	$scope.prepare_build = function(){
+    		$('.export_tweets').prop('disabled', true);
+    		$('.build_tweet_db_location').prop('disabled', true);
+    		$('.build_tweet_db_username').prop('disabled', true);
+    		$('.build_tweet_db_topic').prop('disabled', true);
+    		$('.get_tweets').prop('disabled', true);
+    		$('.visualize_btn').prop('disabled', true);
+			$('.export_btn').prop('disabled', true);
+			//Show loader while db being built
+    		$('#stream').html("<div class='well'><div class='loader'></div></div>");
+    	}
+
+    	//Process response for building the database
+    	$scope.process_build = function(data){
+    		//Tweets were added to the db
+    		if(data == "Tweets have been added to the database!" || data == "There was an error adding at least one tweet to the database."){
+					alert(data);
+					$('.export_tweets').prop('disabled', false);
+					$('.get_tweets').prop('disabled', false);
+					$('.build_tweet_db_topic').prop('disabled', false);
+					$('.build_tweet_db_username').prop('disabled', false);
+					$('.build_tweet_db_location').prop('disabled', false);
+					$('.visualize_btn').prop('disabled', false);
+					$('.export_btn').prop('disabled', false);
+					$('#stream').html("");
+					//Grab the tweets and display them automatically
+					$scope.get_tweets();
+				}
+			else{
+				alert(data);
+				$('.build_tweet_db_topic').prop('disabled', false);
+				$('.build_tweet_db_username').prop('disabled', false);
+				$('.build_tweet_db_location').prop('disabled', false);
+				$('#stream').html("");
+			}
+    	}
+
+    	//For the location query
+    	$scope.build_tweet_db_location = function () {
+    		$scope.prepare_build();
+    		var req = {
+			 	method: 'POST',
+			 	url: '/build_tweet_db',
+			 	data: {'type': 'location','tweet_limit': $scope.tweetCount, 'latitude': $scope.latitude, 'longitude': $scope.longitude}
+			}
+			$http(req).success(function(data){
+				$scope.process_build(data);
+			});
+    	};
+
+    	//For the topic query
+    	$scope.build_tweet_db_topic = function () {
+    		$scope.prepare_build();
+    		var req = {
+			 	method: 'POST',
+			 	url: '/build_tweet_db',
+			 	data: {'type': 'topic','tweet_limit': $scope.tweetCount, 'topic': $scope.topic}
+			}
+			$http(req).success(function(data){
+				$scope.process_build(data);
+			});
+    	};
+
+    	//Username: Most popular tweets
+    	$scope.build_tweet_db_username = function () {
+    		$scope.prepare_build();
+    		var req = {
+			 	method: 'POST',
+			 	url: '/build_tweet_db',
+			 	data: {'type': 'username','tweet_limit': $scope.tweetCount, 'username': $scope.username}
+			}
+			$http(req).success(function(data){
+				$scope.process_build(data);
+			});
+    	};
+
+    	//Reload the page
+    	$scope.new = function () {
+    		var req = {
+			 	method: 'GET',
+			 	url: '/clear'
+			}
+			$http(req).success(function(data){
+				console.log(data);
+			  	location.reload();
+			});
+    	};
+
+    	//Options for conversion
+    	$scope.names = ["JSON", "CSV", "XML"];
+
+    	//For exporting
+    	$scope.export = function () {
+    		console.log("Exporting");
+    		console.log($scope.selectedName);
+    		var req = {
+			 	method: 'POST',
+			 	url: '/export',
+			 	data: {'format': $scope.selectedName, 'file_name': $scope.file_name}
+			}
+			$http(req).success(function(data){
+				alert(data);
+			});
+    	};
+
+    	//Retrieve the tweets from the mongo db
+    	$scope.get_tweets = function () {
+    		console.log("Get Tweets from MongoDB");
+    		var req = {
+			 	method: 'GET',
+			 	url: '/get_tweets'
+			}
+			$http(req).success(function(data){
+				var str = "";
+				$.each(data, function(i,item) {
+					str += '<div class="well">'+data[i].twitter.text+'</div>';
+				});
+				//Replace any old tweets on the page
+				$('#stream').html(str);
+			});
+    	};
+	}]);
+
+</script>
+</html>
