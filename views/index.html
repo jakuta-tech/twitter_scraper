@@ -208,8 +208,13 @@
 				    						</div>
 				    					</div>
 				    				</div>
+				    				<!--Display initially-->
 				    				<div class="form-group">
 			    						<input type="submit" class="export_tweets suBmit btn btn-default btn-block" value="Export" ng-click="export()">
+				    				</div>
+				    				<!--Download file -->
+				    				<div class="download-ready form-group">
+			    						<a href='{{file_source}}' class="suBmit btn btn-primary btn-block">JSON File</a>
 				    				</div>
 				    			</div>
 				    			<div class="state_visual">
@@ -255,6 +260,7 @@
     	$scope.topic = "";
     	$scope.file_name = "";
     	$scope.username = "";
+    	$scope.file_source = "";
 
     	//Show the visualalize features
     	$scope.show_visual_functions = false;
@@ -304,6 +310,9 @@
     		$('.get_tweets').prop('disabled', true);
     		$('.visualize_btn').prop('disabled', true);
 			$('.export_btn').prop('disabled', true);
+
+			$('.download-ready').hide();
+
 			//Show loader while db being built
     		$('#stream').html("<div class='well'><div class='loader'></div></div>");
     	}
@@ -397,9 +406,11 @@
 			 	data: {'format': $scope.selectedName, 'file_name': $scope.file_name}
 			}
 			$http(req).success(function(data){
-				alert(data);
+				$scope.file_source =data;
+				$('.download-ready').show();
 			});
     	};
+
 
     	//Retrieve the tweets from the mongo db
     	$scope.get_tweets = function () {

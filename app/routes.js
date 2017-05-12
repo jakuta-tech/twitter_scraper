@@ -2,8 +2,6 @@ var Twitter = require('twitter');
 var Tweet = require('../app/models/tweets');
 var fs = require('fs');
 var js2xmlparser = require("js2xmlparser");
-// var path = require('path');
-// var mime = require('mime');
 
 module.exports = function(app, express) {
 
@@ -135,13 +133,20 @@ module.exports = function(app, express) {
         res.render('visualize.html');
     });
 
+    app.get('/download/json', function (req, res) {
+       res.download('./twitter.json');
+    });
+
+    app.get('/download/xml', function (req, res) {
+       res.download('./twitter.xml');
+    });
+
+    app.get('/download/csv', function (req, res) {
+       res.download('./twitter.csv');
+    });
+
     //CSV, XML, and JSON Conversion Code
     app.post('/export',function (req, res) {
-
-        var file_name = req.body.file_name;
-        if(file_name == ''){
-            file_name = "untitled";
-        }
 
         Tweet.find({}, function (err, docs) {
             //Retrieve all tweets from MongoDB
@@ -160,13 +165,12 @@ module.exports = function(app, express) {
                 //     //     res.send("Creating file");
                 //     // }
                 // });
-                fs.writeFile(file_name + '.json', JSON.stringify(tweets_array), function(err) {
+                fs.writeFile('twitter.json', JSON.stringify(tweets_array), function(err) {
                     if(err){
                         console.log(err);
                     }
                     else{
-                        var file = file_name + '.json';
-                        res.download(file);
+                        res.send('/download/json'); 
                     }
                     //Clear the tweets array so that the user can get a new stream of tweets and export
                     //that stream if they so choose to
@@ -177,34 +181,21 @@ module.exports = function(app, express) {
             //-----> XML CONVERSION CODE <STILL NOT WORKING PROPERLY>
             else if(req.body.format == "XML"){
                 xmlString = js2xmlparser.parse("tweet", tweets_array);
-                //Check if file already exists
-                fs.stat(file_name + '.xml', function(err, stat) {
-                    if(err == null) {
-                        res.send("File already exists. Overwriting it.");
-                    }
-                    else{
-                        res.send("Creating file");
-                    }
-                });
-                fs.writeFile(file_name + '.xml', xmlString, function(err) {
+                fs.writeFile('twitter.xml', xmlString, function(err) {
                     if(err){
                         console.log(err);
                     }
+                    else{
+                        res.send('/download/xml'); 
+                    }
                     //Clear the tweets array so that the user can get a new stream of tweets and export
                     //that stream if they so choose to
-                    tweets_array = []; 
+                    tweets_array = [];
+                    return; 
                 });
             }
             //-----> CSV CONVERSION CODE
             else if(req.body.format == "CSV"){
-                fs.stat(file_name + '.csv', function(err, stat) {
-                    if(err == null) {
-                        res.send("File already exists. Overwriting it.");
-                    }
-                    else{
-                        res.send("Creating file");
-                    }
-                });
                 //Create CSV header row
                 var str = '"created_at","id","text","user_id","user_name","user_screen_name","user_location","user_followers_count","user_friends_count","user_created_at","user_time_zone","user_profile_background_color","user_profile_image_url","geo","coordinates","place"\n';
                 // Loop through tweets array
@@ -214,13 +205,17 @@ module.exports = function(app, express) {
                     str+= tweets_array[i].created_at + ',' + tweets_array[i].id + ',' +  '"' + tweet_text + '"' + ',' + tweets_array[i].user_id + ',' + tweets_array[i].user_name + ',' + tweets_array[i].user_screen_name + ',' + '"' + tweets_array[i].user_location + '"' + ',' + tweets_array[i].user_followers_count + ',' + tweets_array[i].user_friends_count + ',' + tweets_array[i].user_created_at + ',' + tweets_array[i].user_time_zone + ',' + tweets_array[i].user_profile_background_color + ',' + tweets_array[i].user_profile_image_url + ',' + tweets_array[i].geo + ',' + tweets_array[i].coordinates + ',' + tweets_array[i].place + '\n';
                 }
                 //Actually write to the file the CSV string
-                fs.writeFile(file_name + '.csv', str, function(err) {
+                fs.writeFile('twitter.csv', str, function(err) {
                     if(err){
                         console.log(err);
+                    }
+                    else{
+                        res.send('/download/csv'); 
                     }
                     //Clear the tweets array so that the user can get a new stream of tweets and export
                     //that stream if they so choose to
                     tweets_array = []; 
+                    return;
                 });
             }
         });
