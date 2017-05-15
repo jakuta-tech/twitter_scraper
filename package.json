@@ -23,6 +23,8 @@
     "js2xmlparser":"*",
     "morgan":"*",
     "consolidate":"*",
-    "mustache":"*"
+    "mustache":"*",
+    "express-session":"*",
+    "session":"*"
   }
 }

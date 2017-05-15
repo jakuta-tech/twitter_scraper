@@ -431,8 +431,9 @@
 			}
 			$http(req).success(function(data){
 				var str = "";
+				console.log(data);
 				$.each(data, function(i,item) {
-					str += '<div class="well">'+data[i].twitter.text+'</div>';
+					str += '<div class="well">'+data[i][2]+'</div>';
 				});
 				//Replace any old tweets on the page
 				$('#stream').html(str);

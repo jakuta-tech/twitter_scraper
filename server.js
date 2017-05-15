@@ -5,6 +5,8 @@ var bodyParser = require("body-parser");
 var Twitter = require('twitter');
 var fs = require('fs');
 var morgan       = require('morgan');
+var session = require('express-session');
+// var cookieParser = ('cookie-parser');
 
 //Required for MongoDB
 var mongoose = require('mongoose');
@@ -17,6 +19,7 @@ mongoose.connect(configDB.url); // connect to mongodb database
 app.use(bodyParser.urlencoded({
     extended: true
 }));
+// app.use(express.cookieParser());
 
 var engines = require('consolidate');
 
@@ -24,6 +27,7 @@ app.set('views', __dirname + '/views');
 app.engine('html', engines.mustache);
 app.set('view engine', 'html');
 
+app.use(session({secret: 'keyboard cat', resave: true, saveUninitialized: true, cookie: { secure: false }}))
 app.use(express.static(__dirname + '/views')); //serve our views here (html and all related client side files)
 // app.set('view engine', 'html');
 app.use(bodyParser.json());

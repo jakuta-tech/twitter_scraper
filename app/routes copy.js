@@ -3,28 +3,10 @@ var Tweet = require('../app/models/tweets');
 var fs = require('fs');
 var js2xmlparser = require("js2xmlparser");
 
-var twitter = {
-    created_at: "",
-    id:"",
-    tweet:"",
-    user_id:"",
-    user_name:"",
-    user_screen_name:"",
-    user_location:"",
-    user_followers_count:"",
-    user_friends_count:"",
-    user_created_at:"",
-    user_time_zone:"",
-    user_profile_background_color:"",
-    user_profile_image_url:"",
-    geo:"",
-    coordinates:"",
-    place:""
-};
-
 module.exports = function(app, express) {
 
-    function get_tweets(tweets, req, res, callback){
+    function get_tweets(tweets, res, callback){
+
         var error_count = 0;
 
         //Assume search api is being called
@@ -33,80 +15,86 @@ module.exports = function(app, express) {
         //If tweets.length is defined we are instead calling
         //the status timeline api
         if(tweets.length != undefined){
-            statuses_api = true;
+            statuses_api = true
         }
-        else if(tweets.statuses == undefined || tweets.statuses.length <= 1){
-            res.send("ERROR");
-            console.log("Error");
-            return;
+        else{
+            //For the search api
+            if(tweets.statuses == undefined || tweets.statuses.length <= 1){
+                res.send("Sorry, no tweets were added to the database");
+                return;
+            }
         }
-
-        //estalish array in session to hold data
-        req.session.tweets_pa = [];
-
         //Status timeline api for a particular user : parsing and saving to mongodb
         if(statuses_api == true){
             var remaining = tweets.length;
 
             for (var i = 0; i < tweets.length; i++) {
                 
-                twitter.created_at = tweets[i].created_at;
-                twitter.id = tweets[i].id;
-                twitter.text = tweets[i].text;
-                twitter.user_id = tweets[i].user.id;
-                twitter.user_name = tweets[i].user.name;
-                twitter.user_screen_name = tweets[i].user.screen_name;
-                twitter.user_location = tweets[i].user.location;
-                twitter.user_followers_count = tweets[i].user.followers_count;
-                twitter.user_friends_count = tweets[i].user.friends_count;
-                twitter.user_created_at = tweets[i].user.created_at;
-                twitter.user_time_zone = tweets[i].user.time_zone;
-                twitter.user_profile_background_color = tweets[i].user.profile_background_color;
-                twitter.user_profile_image_url = tweets[i].user.profile_image_url;
-                twitter.geo = tweets[i].geo;
-                twitter.coordinates = tweets[i].coordinates;
-                twitter.place = tweets[i].place;
-                req.session.tweets_pa.push([twitter.created_at,twitter.id,twitter.text,twitter.user_id,twitter.user_name,twitter.user_screen_name,twitter.user_location,twitter.user_followers_count,twitter.user_friends_count,twitter.user_created_at,twitter.user_time_zone,twitter.user_profile_background_color,twitter.user_profile_image_url,twitter.geo,twitter.coordinates,twitter.place])
+                var tweet = new Tweet();
+
+                tweet.twitter.created_at = tweets[i].created_at;
+                tweet.twitter.id = tweets[i].id;
+                tweet.twitter.text = tweets[i].text;
+                tweet.twitter.user_id = tweets[i].user.id;
+                tweet.twitter.user_name = tweets[i].user.name;
+                tweet.twitter.user_screen_name = tweets[i].user.screen_name;
+                tweet.twitter.user_location = tweets[i].user.location;
+                tweet.twitter.user_followers_count = tweets[i].user.followers_count;
+                tweet.twitter.user_friends_count = tweets[i].user.friends_count;
+                tweet.twitter.user_created_at = tweets[i].user.created_at;
+                tweet.twitter.user_time_zone = tweets[i].user.time_zone;
+                tweet.twitter.user_profile_background_color = tweets[i].user.profile_background_color;
+                tweet.twitter.user_profile_image_url = tweets[i].user.profile_image_url;
+                tweet.twitter.geo = tweets[i].geo;
+                tweet.twitter.coordinates = tweets[i].coordinates;
+                tweet.twitter.place = tweets[i].place;
 
                 //Save tweets to database
-                // tweet.save(function (err, results) {
-                remaining --;
-                if(remaining == 0) {
-                    // console.log(req.session);
-                    callback(error_count);
-                }
-                // });
+                tweet.save(function (err, results) {
+                    remaining --;
+                    if(err != null){
+                        error_count += 1;
+                    }
+                    if(remaining == 0) {
+                        callback(error_count);
+                    }
+                });
             }
         }
         //Search api for a particular topic or location : parsing and saving to mongodb
         else {
             var remaining = tweets.statuses.length;
             for (var i = 0; i < tweets.statuses.length; i++) {
-                twitter.created_at = tweets.statuses[i].created_at;
-                twitter.id = tweets.statuses[i].id;
-                twitter.text = tweets.statuses[i].text;
-                twitter.user_id = tweets.statuses[i].user.id;
-                twitter.user_name = tweets.statuses[i].user.name;
-                twitter.user_screen_name = tweets.statuses[i].user.screen_name;
-                twitter.user_location = tweets.statuses[i].user.location;
-                twitter.user_followers_count = tweets.statuses[i].user.followers_count;
-                twitter.user_friends_count = tweets.statuses[i].user.friends_count;
-                twitter.user_created_at = tweets.statuses[i].user.created_at;
-                twitter.user_time_zone = tweets.statuses[i].user.time_zone;
-                twitter.user_profile_background_color = tweets.statuses[i].user.profile_background_color;
-                twitter.user_profile_image_url = tweets.statuses[i].user.profile_image_url;
-                twitter.geo = tweets.statuses[i].geo;
-                twitter.coordinates = tweets.statuses[i].coordinates;
-                twitter.place = tweets.statuses[i].place;
-                req.session.tweets_pa.push([twitter.created_at,twitter.id,twitter.text,twitter.user_id,twitter.user_name,twitter.user_screen_name,twitter.user_location,twitter.user_followers_count,twitter.user_friends_count,twitter.user_created_at,twitter.user_time_zone,twitter.user_profile_background_color,twitter.user_profile_image_url,twitter.geo,twitter.coordinates,twitter.place])
+                
+                var tweet = new Tweet();
+
+                tweet.twitter.created_at = tweets.statuses[i].created_at;
+                tweet.twitter.id = tweets.statuses[i].id;
+                tweet.twitter.text = tweets.statuses[i].text;
+                tweet.twitter.user_id = tweets.statuses[i].user.id;
+                tweet.twitter.user_name = tweets.statuses[i].user.name;
+                tweet.twitter.user_screen_name = tweets.statuses[i].user.screen_name;
+                tweet.twitter.user_location = tweets.statuses[i].user.location;
+                tweet.twitter.user_followers_count = tweets.statuses[i].user.followers_count;
+                tweet.twitter.user_friends_count = tweets.statuses[i].user.friends_count;
+                tweet.twitter.user_created_at = tweets.statuses[i].user.created_at;
+                tweet.twitter.user_time_zone = tweets.statuses[i].user.time_zone;
+                tweet.twitter.user_profile_background_color = tweets.statuses[i].user.profile_background_color;
+                tweet.twitter.user_profile_image_url = tweets.statuses[i].user.profile_image_url;
+                tweet.twitter.geo = tweets.statuses[i].geo;
+                tweet.twitter.coordinates = tweets.statuses[i].coordinates;
+                tweet.twitter.place = tweets.statuses[i].place;
 
                 //Save tweets to database
-                // tweet.save(function (err, results) {
-                remaining --;
-                if(remaining == 0) {
-                    // console.log(req.session);
-                    callback(error_count);
-                }
+                tweet.save(function (err, results) {
+                    remaining --;
+                    if(err != null){
+                        error_count += 1;
+                    }
+                    if(remaining == 0) {
+                        callback(error_count);
+                    }
+                });
             }
         }
     }
@@ -126,8 +114,8 @@ module.exports = function(app, express) {
         };
     }
 
-    // //Tweet text and data (to output to JSON file)
-    // req.session.tweets_fr = []
+    //Tweet text and data (to output to JSON file)
+    tweets_array = []
     
     //Twitter credentials
     var client = new Twitter({
@@ -160,83 +148,83 @@ module.exports = function(app, express) {
     //CSV, XML, and JSON Conversion Code
     app.post('/export',function (req, res) {
 
-        //formatted array of tweets for exporting
-        req.session.tweets_fr = [];
-
-        //Retrieve all tweets
-        //Push into an array that can be accessed by all conversion code
-        for(var i = 0; i< req.session.tweets_pa.length; i++){
-            req.session.tweets_fr.push({"created_at":req.session.tweets_pa[i][0], "id":req.session.tweets_pa[i][1], "text":req.session.tweets_pa[i][2], "user_id":req.session.tweets_pa[i][3], "user_name":req.session.tweets_pa[i][4], "user_screen_name":req.session.tweets_pa[i][5], "user_location":req.session.tweets_pa[i][6], "user_followers_count":req.session.tweets_pa[i][7], "user_friends_count":req.session.tweets_pa[i][8], "user_created_at":req.session.tweets_pa[i][9], "user_time_zone":req.session.tweets_pa[i][10],"user_profile_background_color":req.session.tweets_pa[i][11],"user_profile_image_url":req.session.tweets_pa[i][12],"geo":req.session.tweets_pa[i][13],"coordinates":req.session.tweets_pa[i][14],"place":req.session.tweets_pa[i][15]}); //Add each tweet to an array
-        }
-        //-----> JSON CONVERSION CODE
-        if(req.body.format == "JSON"){
-            //Check if file exists, alert the user if it does or does not
-            // fs.stat(file_name + '.json', function(err, stat) {
-            //     // if(err == null) {
-            //     //     res.send("File already exists. Overwriting it.");
-            //     // }
-            //     // else{
-            //     //     res.send("Creating file");
-            //     // }
-            // });
-            fs.writeFile('twitter.json', JSON.stringify(req.session.tweets_fr), function(err) {
-                if(err){
-                    console.log(err);
-                }
-                else{
-                    res.send('/download/json'); 
-                }
-                //Clear the tweets array so that the user can get a new stream of tweets and export
-                //that stream if they so choose to
-                req.session.tweets_fr = [];
-                return;
-            });
-        }
-        //-----> XML CONVERSION CODE <STILL NOT WORKING PROPERLY>
-        else if(req.body.format == "XML"){
-            xmlString = js2xmlparser.parse("tweet", req.session.tweets_fr);
-            fs.writeFile('twitter.xml', xmlString, function(err) {
-                if(err){
-                    console.log(err);
-                }
-                else{
-                    res.send('/download/xml'); 
-                }
-                //Clear the tweets array so that the user can get a new stream of tweets and export
-                //that stream if they so choose to
-                req.session.tweets_fr = [];
-                return; 
-            });
-        }
-        //-----> CSV CONVERSION CODE
-        else if(req.body.format == "CSV"){
-            //Create CSV header row
-            var str = '"created_at","id","text","user_id","user_name","user_screen_name","user_location","user_followers_count","user_friends_count","user_created_at","user_time_zone","user_profile_background_color","user_profile_image_url","geo","coordinates","place"\n';
-            // Loop through tweets array
-            // Create CSV formatted string
-            for(i=0; i<req.session.tweets_fr.length; i++){
-                var tweet_text = (req.session.tweets_fr[i].text).trim();
-                str+= req.session.tweets_fr[i].created_at + ',' + req.session.tweets_fr[i].id + ',' +  '"' + tweet_text + '"' + ',' + req.session.tweets_fr[i].user_id + ',' + req.session.tweets_fr[i].user_name + ',' + req.session.tweets_fr[i].user_screen_name + ',' + '"' + req.session.tweets_fr[i].user_location + '"' + ',' + req.session.tweets_fr[i].user_followers_count + ',' + req.session.tweets_fr[i].user_friends_count + ',' + req.session.tweets_fr[i].user_created_at + ',' + req.session.tweets_fr[i].user_time_zone + ',' + req.session.tweets_fr[i].user_profile_background_color + ',' + req.session.tweets_fr[i].user_profile_image_url + ',' + req.session.tweets_fr[i].geo + ',' + req.session.tweets_fr[i].coordinates + ',' + req.session.tweets_fr[i].place + '\n';
+        Tweet.find({}, function (err, docs) {
+            //Retrieve all tweets from MongoDB
+            //Push into an array that can be accessed by all conversion code
+            for(var i = 0; i< docs.length; i++){
+                tweets_array.push({"created_at":docs[i].twitter.created_at, "id":docs[i].twitter.id, "text":docs[i].twitter.text, "user_id":docs[i].twitter.user_id, "user_name":docs[i].twitter.user_name, "user_screen_name":docs[i].twitter.user_screen_name, "user_location":docs[i].twitter.user_location, "user_followers_count":docs[i].twitter.user_followers_count, "user_friends_count":docs[i].twitter.user_friends_count, "user_created_at":docs[i].twitter.user_created_at, "user_time_zone":docs[i].twitter.user_time_zone,"user_profile_background_color":docs[i].twitter.user_profile_background_color,"user_profile_image_url":docs[i].twitter.user_profile_image_url,"geo":docs[i].twitter.geo,"coordinates":docs[i].twitter.coordinates,"place":docs[i].twitter.place}); //Add each tweet to an array
             }
-            //Actually write to the file the CSV string
-            fs.writeFile('twitter.csv', str, function(err) {
-                if(err){
-                    console.log(err);
+            //-----> JSON CONVERSION CODE
+            if(req.body.format == "JSON"){
+                //Check if file exists, alert the user if it does or does not
+                // fs.stat(file_name + '.json', function(err, stat) {
+                //     // if(err == null) {
+                //     //     res.send("File already exists. Overwriting it.");
+                //     // }
+                //     // else{
+                //     //     res.send("Creating file");
+                //     // }
+                // });
+                fs.writeFile('twitter.json', JSON.stringify(tweets_array), function(err) {
+                    if(err){
+                        console.log(err);
+                    }
+                    else{
+                        res.send('/download/json'); 
+                    }
+                    //Clear the tweets array so that the user can get a new stream of tweets and export
+                    //that stream if they so choose to
+                    tweets_array = [];
+                    return;
+                });
+            }
+            //-----> XML CONVERSION CODE <STILL NOT WORKING PROPERLY>
+            else if(req.body.format == "XML"){
+                xmlString = js2xmlparser.parse("tweet", tweets_array);
+                fs.writeFile('twitter.xml', xmlString, function(err) {
+                    if(err){
+                        console.log(err);
+                    }
+                    else{
+                        res.send('/download/xml'); 
+                    }
+                    //Clear the tweets array so that the user can get a new stream of tweets and export
+                    //that stream if they so choose to
+                    tweets_array = [];
+                    return; 
+                });
+            }
+            //-----> CSV CONVERSION CODE
+            else if(req.body.format == "CSV"){
+                //Create CSV header row
+                var str = '"created_at","id","text","user_id","user_name","user_screen_name","user_location","user_followers_count","user_friends_count","user_created_at","user_time_zone","user_profile_background_color","user_profile_image_url","geo","coordinates","place"\n';
+                // Loop through tweets array
+                // Create CSV formatted string
+                for(i=0; i<tweets_array.length; i++){
+                    var tweet_text = (tweets_array[i].text).trim();
+                    str+= tweets_array[i].created_at + ',' + tweets_array[i].id + ',' +  '"' + tweet_text + '"' + ',' + tweets_array[i].user_id + ',' + tweets_array[i].user_name + ',' + tweets_array[i].user_screen_name + ',' + '"' + tweets_array[i].user_location + '"' + ',' + tweets_array[i].user_followers_count + ',' + tweets_array[i].user_friends_count + ',' + tweets_array[i].user_created_at + ',' + tweets_array[i].user_time_zone + ',' + tweets_array[i].user_profile_background_color + ',' + tweets_array[i].user_profile_image_url + ',' + tweets_array[i].geo + ',' + tweets_array[i].coordinates + ',' + tweets_array[i].place + '\n';
                 }
-                else{
-                    res.send('/download/csv'); 
-                }
-                //Clear the tweets array so that the user can get a new stream of tweets and export
-                //that stream if they so choose to
-                req.session.tweets_fr = []; 
-                return;
-            });
-        }
+                //Actually write to the file the CSV string
+                fs.writeFile('twitter.csv', str, function(err) {
+                    if(err){
+                        console.log(err);
+                    }
+                    else{
+                        res.send('/download/csv'); 
+                    }
+                    //Clear the tweets array so that the user can get a new stream of tweets and export
+                    //that stream if they so choose to
+                    tweets_array = []; 
+                    return;
+                });
+            }
+        });
     });
 
     app.post('/build_tweet_db', function (req, res) {
-        req.session.tweets_pa = [];
-
+        Tweet.remove(function(err,removed) {
+            // Remove all Tweets from database
+        });
         var query, api_type = "";
         //Determine what the query request is: by topic or location
         //Based on this determine what api call should be used
@@ -250,7 +238,7 @@ module.exports = function(app, express) {
             else{
                 tweet_topic = req.body.topic;
             }
-            if(req.body.tweet_limit == '' || !isInt(req.body.tweet_limit) || (req.body.tweet_limit <= 1) || (req.body.tweet_limit > 50)){
+            if(req.body.tweet_limit == '' || !isInt(req.body.tweet_limit) || (req.body.tweet_limit <= 1)){
                 tweet_count = 5;
             }
             else {
@@ -271,7 +259,7 @@ module.exports = function(app, express) {
                 longitude = req.body.longitude;
             }
             //If the count has not been set of the count is not an integer
-            if(req.body.tweet_limit == '' || !isInt(req.body.tweet_limit) || (req.body.tweet_limit <= 1) || (req.body.tweet_limit > 50)){
+            if(req.body.tweet_limit == '' || !isInt(req.body.tweet_limit) || (req.body.tweet_limit <= 1)){
                 tweet_count = 5;
             }
             else {
@@ -292,7 +280,7 @@ module.exports = function(app, express) {
             else{
                 tweet_username = req.body.username;
             }
-            if(req.body.tweet_limit == '' || !isInt(req.body.tweet_limit) || (req.body.tweet_limit <= 1) || (req.body.tweet_limit > 50)){
+            if(req.body.tweet_limit == '' || !isInt(req.body.tweet_limit) || (req.body.tweet_limit <= 1)){
                 tweet_count = 5;
             }
             else {
@@ -310,7 +298,7 @@ module.exports = function(app, express) {
             else{
                 //Error checking + pushing tweets to mongodb
                 try{
-                   get_tweets(tweets, req, res, function(error_count){
+                   get_tweets(tweets, res, function(error_count){
                    	   if(api_type == 'statuses/user_timeline' && error_count == tweets.length){
                             res.send("There was an error saving the tweets to the database. Try again!");
                        }
@@ -334,19 +322,23 @@ module.exports = function(app, express) {
     });
 
     app.get('/get_tweets', function (req, res) {
-        if(req.session.tweets_pa.length >= 1){
-            res.send(req.session.tweets_pa);
+        Tweet.find({}, 'twitter.text', function (err, docs) {
+            if(err || docs == undefined){
+                res.send("Sorry, could not get any tweets from the DB. Please try again later."); //Send tweets to client
+                return;
+            }
+            // console.log(docs);
+            res.send(docs); //Send tweets to client
             return;
-        }
-        else{
-            res.send("Sorry, could not get any tweets from the DB. Please try again later."); //Send tweets to client
-            return; 
-        }
+        });
     });
 
     app.get('/clear', function (req, res) {
-        req.session.tweets_pa = [];
-        res.send("Refreshing");
+        Tweet.remove(function(err,removed) {
+            // Remove all Tweets from database
+            res.send("Refreshing");
+        });
+
     });
 
     //Visualize Tweets Three Different Ways
@@ -355,34 +347,34 @@ module.exports = function(app, express) {
     //For example, if a twitter user has 50 followers they will be 
     //put into the 0-99 followers category
     app.post('/visualize_function', function(req, res){
-        // Tweet.find({}, function (err, tweets) {
-            // if(err || tweets == undefined){
-            //     res.send("Sorry, could not get any tweets from the DB. Please try again later."); //Send tweets to client
-            //     return;
-            // }
+        Tweet.find({}, function (err, tweets) {
+            if(err || tweets == undefined){
+                res.send("Sorry, could not get any tweets from the DB. Please try again later."); //Send tweets to client
+                return;
+            }
 
             var dict = {}; //dictionary where keys are levels or locations, values are frequency of tweets that fit these categories
             var keys = []; //list of keys
 
             //Go through all tweets returned from db
-            for(i=0; i<req.session.tweets_pa.length; i++){
+            for(i=0; i<tweets.length; i++){
                 //Determine appropriate operation
                 if(req.body.q == 'location'){
 
                     //If key (location) not defined define it, set frequency to 1
-                    if(dict[req.session.tweets_pa[i][6]] == undefined){
-                        dict[req.session.tweets_pa[i][6]] = 1;
-                        keys.push(req.session.tweets_pa[i][6]);
-                        console.log(req.session.tweets_pa[i][6]);
+                    if(dict[tweets[i].twitter.user_location] == undefined){
+                        dict[tweets[i].twitter.user_location] = 1;
+                        keys.push(tweets[i].twitter.user_location);
+                        console.log(tweets[i].twitter.user_location);
                     }
                     else{
                         //Else, increment frequency of tweets
                         //That fall into a particular location
-                        dict[req.session.tweets_pa[i][6]] += 1;
+                        dict[tweets[i].twitter.user_location] += 1;
                     }
                 }
                 else if(req.body.q == 'friends_count_level'){
-                    if(parseInt(req.session.tweets_pa[i][8]) >= 10000){ //10000
+                    if(parseInt(tweets[i].twitter.user_friends_count) >= 10000){ //10000
 
                         //If key (category) not defined define it, set frequency to 1
                         if(dict[">= 10,000"] == undefined){
@@ -396,7 +388,7 @@ module.exports = function(app, express) {
                             dict[">= 10,000"] += 1;
                         }
                     }
-                    else if(parseInt(req.session.tweets_pa[i][8]) >= 1000){ //10000
+                    else if(parseInt(tweets[i].twitter.user_friends_count) >= 1000){ //10000
                         //If key (category) not defined define it, set frequency to 1
                         if(dict["1,000 - 9,999"] == undefined){
                             dict["1,000 - 9,999"] = 1;
@@ -409,7 +401,7 @@ module.exports = function(app, express) {
                             dict["1,000 - 9,999"] += 1;
                         }
                     }
-                    else if(parseInt(req.session.tweets_pa[i][8]) >= 100){ //10000
+                    else if(parseInt(tweets[i].twitter.user_friends_count) >= 100){ //10000
                         if(dict["100 - 999"] == undefined){
                             dict["100 - 999"] = 1;
                             keys.push("100 - 999");
@@ -432,7 +424,7 @@ module.exports = function(app, express) {
                 }
                 else if(req.body.q == 'followers_count_level'){
 
-                    if(parseInt(req.session.tweets_pa[i][7]) >= 10000){ //10000
+                    if(parseInt(tweets[i].twitter.user_followers_count) >= 10000){ //10000
                         if(dict[">= 10,000"] == undefined){
                             dict[">= 10,000"] = 1;
                             keys.push(">= 10,000");
@@ -442,7 +434,7 @@ module.exports = function(app, express) {
                             dict[">= 10,000"] += 1;
                         }
                     }
-                    else if(parseInt(req.session.tweets_pa[i][7]) >= 1000){ //10000
+                    else if(parseInt(tweets[i].twitter.user_followers_count) >= 1000){ //10000
                         if(dict["1,000 - 9,999"] == undefined){
                             dict["1,000 - 9,999"] = 1;
                             keys.push("1,000 - 9,999");
@@ -452,7 +444,7 @@ module.exports = function(app, express) {
                             dict["1,000 - 9,999"] += 1;
                         }
                     }
-                    else if(parseInt(req.session.tweets_pa[i][7]) >= 100){ //10000
+                    else if(parseInt(tweets[i].twitter.user_followers_count) >= 100){ //10000
                         if(dict["100 - 999"] == undefined){
                             dict["100 - 999"] = 1;
                             keys.push("100 - 999");
@@ -479,11 +471,11 @@ module.exports = function(app, express) {
                 }
                 //Send array back to client, first element the dictionary and the second keys array
                 //Used to index dictionary
-                if(i == req.session.tweets_pa.length-1){
+                if(i == tweets.length-1){
                     res.send([dict,keys]);
                     return;
                 }
             }
         });
-    // });
+    });
 };
