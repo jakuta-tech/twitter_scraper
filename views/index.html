@@ -11,6 +11,7 @@
     	h1, h5{
     		text-align: center;
     	}
+    	/*This is used to provide extra spacing between buttons when screen width is small*/
     	.suBmit {
     		margin-top: 10px;
     	}
@@ -89,10 +90,10 @@
 			    				<div class="form-group">
 			    					<div class="row">
 			    						<div class="col col-md-6">
-			    							<button class="export_btn btn btn-primary btn-block" ng-click="toggle_export()">Export Tweets</button>
+			    							<button class="suBmit export_btn btn btn-primary btn-block" ng-click="toggle_export()">Export Tweets</button>
 			    						</div>
 			    						<div class="col col-md-6">
-			    							<button class="visualize_btn btn btn-primary btn-block" ng-click="toggle_visual()">Visualize Tweets</button>
+			    							<button class="suBmit visualize_btn btn btn-primary btn-block" ng-click="toggle_visual()">Visualize Tweets</button>
 			    						</div>
 			    					</div>
 			    				</div>
@@ -101,12 +102,12 @@
 				    				<label>Step 3: Choose the file type of your choice, select a title, and Export Tweets</label>
 				    				<div class="form-group">
 				    					<div class="row">
-				    						<div class="col col-md-6">
+				    						<div class="col col-md-12">
 				    							File Format: <select class='form-control suBmit' ng-model="selectedName" ng-init="selectedName = names[0]" ng-options="item for item in names"></select>
 				    						</div>
-				    						<div class="col col-md-6">
+				    						<!-- <div class="col col-md-6">
 				    							File Name: <input class="form-control suBmit" type="text" id="location" placeholder="Troy_NY" ng-model="file_name">
-				    						</div>
+				    						</div> -->
 				    					</div>
 				    				</div>
 				    				<!--Display initially-->
@@ -143,10 +144,10 @@
 			    				<div class="form-group">
 			    					<div class="row">
 			    						<div class="col col-md-6">
-			    							<button class="export_btn btn btn-primary btn-block" ng-click="toggle_export()">Export Tweets</button>
+			    							<button class="suBmit export_btn btn btn-primary btn-block" ng-click="toggle_export()">Export Tweets</button>
 			    						</div>
 			    						<div class="col col-md-6">
-			    							<button class="visualize_btn btn btn-primary btn-block" ng-click="toggle_visual()">Visualize Tweets</button>
+			    							<button class="suBmit visualize_btn btn btn-primary btn-block" ng-click="toggle_visual()">Visualize Tweets</button>
 			    						</div>
 			    					</div>
 			    				</div>
@@ -155,12 +156,12 @@
 				    				<label>Step 3: Choose the file type of your choice, select a title, and Export Tweets</label>
 				    				<div class="form-group">
 				    					<div class="row">
-				    						<div class="col col-md-6">
+				    						<div class="col col-md-12">
 				    							File Format: <select class='form-control suBmit' ng-model="selectedName" ng-init="selectedName = names[0]" ng-options="item for item in names"></select>
 				    						</div>
-				    						<div class="col col-md-6">
+				    						<!-- <div class="col col-md-6">
 				    							File Name: <input class="form-control suBmit" type="text" id="topic" placeholder="IT" ng-model="file_name">
-				    						</div>
+				    						</div> -->
 				    					</div>
 				    				</div>
 				    				<!--Display initially-->
@@ -198,10 +199,10 @@
 			    				<div class="form-group">
 			    					<div class="row">
 			    						<div class="col col-md-6">
-			    							<button class="export_btn btn btn-primary btn-block" ng-click="toggle_export()">Export Tweets</button>
+			    							<button class="suBmit export_btn btn btn-primary btn-block" ng-click="toggle_export()">Export Tweets</button>
 			    						</div>
 			    						<div class="col col-md-6">
-			    							<button class="visualize_btn btn btn-primary btn-block" ng-click="toggle_visual()">Visualize Tweets</button>
+			    							<button class="suBmit visualize_btn btn btn-primary btn-block" ng-click="toggle_visual()">Visualize Tweets</button>
 			    						</div>
 			    					</div>
 			    				</div>
@@ -210,12 +211,12 @@
 				    				<label>Step 3: Choose the file type of your choice, select a title, and Export Tweets</label>
 				    				<div class="form-group">
 				    					<div class="row">
-				    						<div class="col col-md-6">
+				    						<div class="col col-md-12">
 				    							File Format: <select class='form-control suBmit' ng-model="selectedName" ng-init="selectedName = names[0]" ng-options="item for item in names"></select>
 				    						</div>
-				    						<div class="col col-md-6">
+				    						<!-- <div class="col col-md-6">
 				    							File Name: <input class="form-control suBmit" type="text" id="username" placeholder="realDonaldTrump" ng-model="file_name">
-				    						</div>
+				    						</div> -->
 				    					</div>
 				    				</div>
 				    				<!--Display initially-->
