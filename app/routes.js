@@ -1,5 +1,4 @@
 var Twitter = require('twitter');
-var Tweet = require('../app/models/tweets');
 var fs = require('fs');
 var js2xmlparser = require("js2xmlparser");
 

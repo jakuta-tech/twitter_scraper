@@ -6,15 +6,7 @@ var Twitter = require('twitter');
 var fs = require('fs');
 var morgan       = require('morgan');
 var session = require('express-session');
-// var cookieParser = ('cookie-parser');
 
-//Required for MongoDB
-// var mongoose = require('mongoose');
-// var configDB = require('./config/database.js'); //External config for db
-
-
-// mongoose.Promise = global.Promise;
-// mongoose.connect(configDB.url); // connect to mongodb database
 
 app.use(bodyParser.urlencoded({
     extended: true
