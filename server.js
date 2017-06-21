@@ -9,12 +9,12 @@ var session = require('express-session');
 // var cookieParser = ('cookie-parser');
 
 //Required for MongoDB
-var mongoose = require('mongoose');
-var configDB = require('./config/database.js'); //External config for db
+// var mongoose = require('mongoose');
+// var configDB = require('./config/database.js'); //External config for db
 
 
-mongoose.Promise = global.Promise;
-mongoose.connect(configDB.url); // connect to mongodb database
+// mongoose.Promise = global.Promise;
+// mongoose.connect(configDB.url); // connect to mongodb database
 
 app.use(bodyParser.urlencoded({
     extended: true
@@ -37,6 +37,6 @@ app.use(morgan('dev')); // log every request to the console
 require('./app/routes')(app, express);
 
 
-server.listen(80, function () {
+server.listen(8080, function () {
     console.log("Started");
 });
