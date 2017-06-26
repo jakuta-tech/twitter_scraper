@@ -27,24 +27,38 @@ module.exports = function(app, express) {
         var error_count = 0;
 
         //Assume search api is being called
-        var statuses_api = false;
+        var search_api = true;
 
-        //If tweets.length is defined we are instead calling
-        //the status timeline api
-        if(tweets.length != undefined){
-            statuses_api = true;
+        console.log(tweets);
+
+        //tweets.statuses undefined means its not the search api
+		if(tweets.statuses == undefined){
+            search_api = false;
+            console.log('Status API...');
         }
-        else if(tweets.statuses == undefined || tweets.statuses.length <= 1){
-            res.send("ERROR");
-            console.log("Error");
-            return;
+
+        //Case where no tweets returned for search api
+        if(tweets.statuses != undefined){
+        	if(tweets.statuses.length == 0){
+        		console.log("Error 103");
+        		res.send("Sorry there was an error!");
+        	}
         }
+
+        //Case where no tweets are returned for status timeline api
+        if(tweets != undefined){
+        	if(tweets.length == 0){
+        		console.log("Error 104");
+        		res.send("Sorry there was an error!");
+        	}
+        }
+
 
         //estalish array in session to hold data
         req.session.tweets_pa = [];
 
         //Status timeline api for a particular user : parsing and saving to mongodb
-        if(statuses_api == true){
+        if(search_api == false){
             var remaining = tweets.length;
 
             for (var i = 0; i < tweets.length; i++) {

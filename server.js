@@ -7,6 +7,13 @@ var fs = require('fs');
 var morgan       = require('morgan');
 var session = require('express-session');
 
+//set to 8080 by default
+var port = 8080
+if (process.argv.length == 3) {
+	port = process.argv[2]
+}
+console.log(port);
+
 
 app.use(bodyParser.urlencoded({
     extended: true
@@ -29,6 +36,6 @@ app.use(morgan('dev')); // log every request to the console
 require('./app/routes')(app, express);
 
 
-server.listen(8080, function () {
-    console.log("Started");
+server.listen(port, function () {
+    console.log("Started sever on " + port);
 });
