@@ -81,14 +81,11 @@ module.exports = function(app, express) {
                 twitter.place = tweets[i].place;
                 req.session.tweets_pa.push([twitter.created_at,twitter.id,twitter.text,twitter.user_id,twitter.user_name,twitter.user_screen_name,twitter.user_location,twitter.user_followers_count,twitter.user_friends_count,twitter.user_created_at,twitter.user_time_zone,twitter.user_profile_background_color,twitter.user_profile_image_url,twitter.geo,twitter.coordinates,twitter.place])
 
-                //Save tweets to database
-                // tweet.save(function (err, results) {
                 remaining --;
                 if(remaining == 0) {
                     // console.log(req.session);
                     callback(error_count);
                 }
-                // });
             }
         }
         //Search api for a particular topic or location : parsing and saving to mongodb
@@ -205,7 +202,7 @@ module.exports = function(app, express) {
                 return;
             });
         }
-        //-----> XML CONVERSION CODE <STILL NOT WORKING PROPERLY>
+        //-----> XML CONVERSION CODE
         else if(req.body.format == "XML"){
             xmlString = js2xmlparser.parse("tweet", req.session.tweets_fr);
             fs.writeFile('twitter.xml', xmlString, function(err) {
@@ -368,11 +365,6 @@ module.exports = function(app, express) {
     //For example, if a twitter user has 50 followers they will be 
     //put into the 0-99 followers category
     app.post('/visualize_function', function(req, res){
-        // Tweet.find({}, function (err, tweets) {
-            // if(err || tweets == undefined){
-            //     res.send("Sorry, could not get any tweets from the DB. Please try again later."); //Send tweets to client
-            //     return;
-            // }
 
             var dict = {}; //dictionary where keys are levels or locations, values are frequency of tweets that fit these categories
             var keys = []; //list of keys
