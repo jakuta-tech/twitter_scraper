@@ -144,10 +144,10 @@ module.exports = function(app, express) {
     
     //Twitter credentials
     var client = new Twitter({
-      consumer_key: 'jKGAGGgBM73WvbMcWQYRql8It',
-      consumer_secret: 'TtdGCbtPNusoTVx2ehxYkIxODZhJXzX52k7gBIs32CTyY4mC3h',
-      access_token_key: '243405576-kTmFPozQd89EQ1LGPWaElkqaXsYLLYDD4lQWjJQd',
-      access_token_secret: 'cj7hS6kDsHmeZQxbOE5PR80iALAXuF6nCV7diHmPmfg02'
+      consumer_key: 'XXXXXXXXXXX',
+      consumer_secret: 'XXXXXXXXXXX',
+      access_token_key: 'XXXXXXXXXXX',
+      access_token_secret: 'XXXXXXXXXXX'
     });
 
     app.get('/', function (req, res) {
